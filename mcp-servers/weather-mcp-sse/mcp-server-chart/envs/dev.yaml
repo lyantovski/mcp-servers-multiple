@@ -1,0 +1,6 @@
+namespace: mcp-dev
+
+#Application environment variables
+envVariables:
+  logLevel: DEBUG
+  envName: dev

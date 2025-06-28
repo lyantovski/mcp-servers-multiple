@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/instance: weather-mcp-server
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: weather-mcp-server
+    app.kubernetes.io/version: {{ .Values.app.version }}
+  annotations:
+    version: {{ .Values.app.version }}
+spec:
+  progressDeadlineSeconds: {{ .Values.spec.progressDeadlineSeconds }}
+  replicas: {{ .Values.spec.replicas }}
+  revisionHistoryLimit: {{ .Values.spec.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      app.kubernetes.io/instance: weather-mcp-server
+      app.kubernetes.io/name: weather-mcp-server
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.spec.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.spec.strategy.rollingUpdate.maxUnavailable }}
+    type: {{ .Values.spec.strategy.type }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        app.kubernetes.io/instance: weather-mcp-server
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: weather-mcp-server
+        app.kubernetes.io/version: {{ .Values.app.version }}
+      annotations:
+        version: {{ .Values.app.version }}
+        kubectl.kubernetes.io/default-container: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Values.spec.pod.serviceAccountName }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.spec.pod.containers.imageName }}
+        imagePullPolicy: {{ .Values.spec.pod.containers.imagePullPolicy }}
+        resources:
+          limits:
+            memory: {{ .Values.spec.pod.containers.resources.memory }}
+          requests:
+            cpu: {{ .Values.spec.pod.containers.resources.cpu }}
+            memory: {{ .Values.spec.pod.containers.resources.memory }}
+        ports:
+        - name: {{ .Values.spec.pod.containers.ports.name }}
+          containerPort: {{ .Values.spec.pod.containers.ports.containerPort }}
+        env:
+        - name: LOG_LEVEL
+          value: {{ .Values.envVariables.logLevel }}
+        - name: ENV_NAME
+          value: {{ .Values.envVariables.envName }}
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - |
+              response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/mcp)
+              if [ "$response" -eq 307 ]; then exit 0; else exit 1; fi          
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - |
+              response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/mcp)
+              if [ "$response" -eq 307 ]; then exit 0; else exit 1; fi
+        volumeMounts: 
+      volumes: 
+      restartPolicy: {{ .Values.spec.pod.restartPolicy }}
