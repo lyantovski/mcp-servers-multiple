@@ -1,0 +1,23 @@
+apiVersion: kaito.sh/v1alpha1
+kind: Workspace
+metadata:
+  name: workspace-phi-4-mini-tuned
+  namespace: mcp-dev
+  annotations:
+    kaito.sh/enablelb: "false"
+resource:
+  count: 1
+  instanceType: "Standard_NC24ads_A100_v4"
+  labelSelector:
+    matchLabels:
+      apps: phi-4-mini-tuned
+tuning:
+  preset:
+    name: phi-4-mini-instruct
+  method: qlora
+  input:
+    urls:
+      - "https://huggingface.co/datasets/orsharon/kaito/resolve/main/kaito_training_dataset.parquet?download=true"
+  output:
+      image: myacr.azurecr.io/phi-4-mini-tuned:1.0.0
+      imagePushSecret: myregistrysecret

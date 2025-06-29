@@ -1,0 +1,16 @@
+apiVersion: kaito.sh/v1alpha1
+kind: Workspace
+metadata:
+  name: workspace-phi-4-mini-instruct
+  namespace: mcp-dev
+  annotations:
+    kaito.sh/enablelb: "false"
+resource:
+  count: 1
+  instanceType: "Standard_NC24ads_A100_v4"
+  labelSelector:
+    matchLabels:
+      apps: phi-4-mini-instruct
+inference:
+  preset:
+    name: "phi-4-mini-instruct"

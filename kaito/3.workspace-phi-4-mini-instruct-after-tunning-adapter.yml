@@ -1,0 +1,22 @@
+apiVersion: kaito.sh/v1alpha1
+kind: Workspace
+metadata:
+  name: workspace-phi-4-mini-adapter
+  namespace: mcp-dev
+  annotations:
+    kaito.sh/enablelb: "false"
+resource:
+  count: 1
+  instanceType: "Standard_NC24ads_A100_v4"
+  labelSelector:
+    matchLabels:
+      apps: phi-4-mini-adapter
+inference:
+  preset:
+    name: phi-4-mini-instruct
+  adapters:
+    - source:
+        name: myadapter
+        image: myacr.azurecr.io/phi-4-mini-tuned:1.0.0
+        imagePullSecrets:
+          - myregistrysecret
