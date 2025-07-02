@@ -7,6 +7,7 @@ Azure MCP server using SSE (Server-Sent Events) HTTP Transport and Weather MCP S
 **Read the Blog Posts**: 
 - Part 1: https://medium.com/@lioryantovski/running-mcp-clients-on-aks-connecting-to-both-aks-based-and-remote-mcp-servers-part-1-416c89f0b3de
 - Part 2: https://medium.com/@lioryantovski/running-mcp-clients-on-aks-connecting-to-both-aks-based-and-remote-mcp-servers-part-2-8ce7f57d78bb
+- KAITO Small introduction: https://medium.com/@lioryantovski/small-introduction-to-kaito-1dd83cdd4144 
 
 ## Project folders
 - `mcp-servers`: 
