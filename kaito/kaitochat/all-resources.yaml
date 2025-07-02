@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kaito-chat
+  namespace: chatbot
+data:
+  TEMPERATURE: "0.9"
+  AZURE_OPENAI_TYPE: ""
+  AZURE_OPENAI_BASE: ""
+  AZURE_OPENAI_KEY: ""
+  AZURE_OPENAI_VERSION: "2024-02-01"
+  AZURE_OPENAI_DEPLOYMENT: ""
+  AZURE_OPENAI_MODEL: ""
+  AZURE_OPENAI_SYSTEM_MESSAGE: "You are a helpful assistant."
+  USE_LOCAL_LLM: "True"
+  AI_ENDPOINT: "http://workspace-phi-4-mini-adapter.chatbot/chat"
+  MAX_RETRIES: "5"
+  TIMEOUT: "30"
+  DEBUG: "False"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kaito-chat
+  namespace: chatbot
+  labels:
+    app: kaito-chat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kaito-chat
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: kaito-chat
+        prometheus.io/scrape: "true"
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: kaito-chat
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: kaito-chat
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: kaito-chat
+        image: myacr.azurecr.io/kaitochat:1.0.0
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        env:
+        - name: TEMPERATURE
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: TEMPERATURE
+        - name: AZURE_OPENAI_TYPE
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_TYPE
+        - name: AZURE_OPENAI_BASE
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_BASE
+        - name: AZURE_OPENAI_KEY
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_KEY
+        - name: AZURE_OPENAI_VERSION
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_VERSION
+        - name: AZURE_OPENAI_DEPLOYMENT
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_DEPLOYMENT
+        - name: AZURE_OPENAI_MODEL
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_MODEL
+        - name: AZURE_OPENAI_SYSTEM_MESSAGE
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AZURE_OPENAI_SYSTEM_MESSAGE
+        - name: USE_LOCAL_LLM
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: USE_LOCAL_LLM
+        - name: AI_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: AI_ENDPOINT
+        - name: MAX_RETRIES
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: MAX_RETRIES
+        - name: TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: TIMEOUT
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+                name: kaito-chat
+                key: DEBUG
+---				
+apiVersion: v1
+kind: Service
+metadata:
+  name: kaito-chat
+  namespace: chatbot
+  labels:
+    app: kaito-chat
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+    name: http
+  selector:
+    app: kaito-chat
