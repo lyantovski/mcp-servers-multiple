@@ -12,7 +12,9 @@ Azure MCP server using SSE (Server-Sent Events) HTTP Transport and Weather MCP S
 - `mcp-servers`: 
    - azure-mcp-server: Azure MCP server using SSE (/sse endpoint)
    - weather-mcp-server: Weather MCP Server using Streamable HTTP (/mcp endpoint)
-- `kaito`: Workspace CRD files for differnet steps of using KAITO
-   - Creating inference endpoint for LLM model "phi-4-mini-instruct"
-   - Running fine-tuning on LLM model "phi-4-mini-instruct" with parquet file with sample data about KAITO itself, located on HuggingFace
-   - Creating inference endpoint for LLM model "phi-4-mini-instruct" with container "adapter" created on step before
+- `kaito`: 
+   - workspace: Workspace CRD files for differnet steps of using KAITO
+     - Creating inference endpoint for LLM model "phi-4-mini-instruct"
+     - Running fine-tuning on LLM model "phi-4-mini-instruct" with parquet file with sample data about KAITO itself, located on HuggingFace
+     - Creating inference endpoint for LLM model "phi-4-mini-instruct" with container "adapter" created on step before
+   - kaitochat: example Chainlit application that can be used to connect to Workspace inference endpoint
